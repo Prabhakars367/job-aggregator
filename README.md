@@ -7,14 +7,13 @@ A lightweight, dark-mode job aggregator built with FastAPI and modular "Hidden A
 To host this app online for free using GitHub and Render:
 
 ### 1. Push to GitHub
-1. Create a new repository on GitHub.
-2. Initialize git in your local folder:
+> [!NOTE]
+> **I have already initialized git and committed your files locally.** You only need to run the following:
+
+1. Create a new repository on GitHub named `job-aggregator-india`.
+2. Run these commands in your terminal:
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin YOUR_GITHUB_REPO_URL
+   git remote add origin https://github.com/YOUR_USERNAME/job-aggregator-india.git
    git push -u origin main
    ```
 

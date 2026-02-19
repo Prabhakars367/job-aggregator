@@ -7,6 +7,7 @@ import uvicorn
 
 from models import SessionLocal, init_db, Job
 from scrapers import run_all_scrapers
+from config import settings
 
 # Initialize database
 init_db()
@@ -63,4 +64,4 @@ async def trigger_scrape(db: Session = Depends(get_db)):
     return {"message": "Scraping completed", "new_jobs_added": new_jobs_added}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)

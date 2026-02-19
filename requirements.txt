@@ -8,3 +8,4 @@ python-multipart
 beautifulsoup4
 gunicorn
 uvicorn
+python-dotenv
