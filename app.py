@@ -64,4 +64,4 @@ async def trigger_scrape(db: Session = Depends(get_db)):
     return {"message": "Scraping completed", "new_jobs_added": new_jobs_added}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
+    uvicorn.run("app:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
