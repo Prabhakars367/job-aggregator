@@ -25,6 +25,11 @@ To host this app online for free using GitHub and Render:
    - **Environment**: `Python`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker`
+
+> [!IMPORTANT]
+> **If you see a `TypeError` on Render**, it means Render is ignoring the `Procfile`. 
+> Go to **Settings** -> **Start Command** in your Render dashboard and manually paste:
+> `gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker`
 5. Click **"Create Web Service"**.
 
 ## 🛠️ Local Setup
