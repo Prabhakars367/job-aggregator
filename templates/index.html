@@ -56,22 +56,22 @@
             </div>
 
             <div class="flex flex-wrap gap-3 items-center">
-                <span class="text-sm font-medium text-slate-400">Hubs:</span>
+                <span class="text-sm font-medium text-slate-400">Experience:</span>
                 <button
-                    class="filter-chip active px-4 py-1.5 rounded-full text-sm font-medium border border-indigo-500 bg-indigo-500/10 text-indigo-300 transition-all hover:bg-indigo-500/20"
-                    data-hub="all">All</button>
+                    class="exp-chip active px-4 py-1.5 rounded-full text-sm font-medium border border-indigo-500 bg-indigo-500/10 text-indigo-300 transition-all hover:bg-indigo-500/20"
+                    data-level="all">All</button>
                 <button
-                    class="filter-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
-                    data-hub="bangalore">Bangalore</button>
+                    class="exp-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
+                    data-level="Entry">Entry</button>
                 <button
-                    class="filter-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
-                    data-hub="gurgaon">Gurgaon / Delhi</button>
+                    class="exp-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
+                    data-level="Mid">Mid</button>
                 <button
-                    class="filter-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
-                    data-hub="pune">Pune</button>
+                    class="exp-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
+                    data-level="Senior">Senior</button>
                 <button
-                    class="filter-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
-                    data-hub="remote">Remote</button>
+                    class="exp-chip px-4 py-1.5 rounded-full text-sm font-medium border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-slate-600 hover:text-slate-300"
+                    data-level="Lead">Lead</button>
             </div>
         </div>
 
@@ -79,12 +79,18 @@
         <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for job in jobs %}
             <div class="job-card rounded-xl p-6 flex flex-col h-full" data-title="{{ job.job_title }}"
-                data-company="{{ job.company_name }}" data-location="{{ job.location }}">
+                data-company="{{ job.company_name }}" data-location="{{ job.location }}"
+                data-exp="{{ job.experience_level }}">
                 <div class="flex justify-between items-start mb-4">
-                    <span
-                        class="bg-indigo-900/50 text-indigo-300 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
-                        {{ job.company_name }}
-                    </span>
+                    <div class="flex flex-col gap-1">
+                        <span
+                            class="bg-indigo-900/50 text-indigo-300 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider w-fit">
+                            {{ job.company_name }}
+                        </span>
+                        <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">
+                            {{ job.experience_level }}
+                        </span>
+                    </div>
                     <span class="text-slate-500 text-sm">
                         {{ job.date_added.strftime('%b %d') }}
                     </span>
@@ -123,6 +129,7 @@
         const filterChips = document.querySelectorAll('.filter-chip');
 
         let activeHub = 'all';
+        let activeExp = 'all';
 
         // Combined filter function
         const applyFilters = () => {
@@ -134,9 +141,11 @@
                 const title = card.dataset.title.toLowerCase();
                 const company = card.dataset.company.toLowerCase();
                 const location = card.dataset.location.toLowerCase();
+                const exp = card.dataset.exp;
 
                 const matchesSearch = title.includes(term) || company.includes(term);
                 let matchesHub = true;
+                let matchesExp = true;
 
                 if (activeHub !== 'all') {
                     if (activeHub === 'remote') {
@@ -148,7 +157,11 @@
                     }
                 }
 
-                if (matchesSearch && matchesHub) {
+                if (activeExp !== 'all') {
+                    matchesExp = (exp === activeExp);
+                }
+
+                if (matchesSearch && matchesHub && matchesExp) {
                     card.style.display = 'flex';
                     foundCount++;
                 } else {
@@ -178,6 +191,22 @@
                 chip.classList.remove('border-slate-700', 'bg-slate-800', 'text-slate-400');
 
                 activeHub = chip.dataset.hub;
+                applyFilters();
+            });
+        });
+
+        // Experience chip listeners
+        const expChips = document.querySelectorAll('.exp-chip');
+        expChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                expChips.forEach(c => {
+                    c.classList.remove('active', 'border-indigo-500', 'bg-indigo-500/10', 'text-indigo-300');
+                    c.classList.add('border-slate-700', 'bg-slate-800', 'text-slate-400');
+                });
+                chip.classList.add('active', 'border-indigo-500', 'bg-indigo-500/10', 'text-indigo-300');
+                chip.classList.remove('border-slate-700', 'bg-slate-800', 'text-slate-400');
+
+                activeExp = chip.dataset.level;
                 applyFilters();
             });
         });

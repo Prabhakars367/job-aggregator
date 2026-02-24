@@ -35,7 +35,8 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
 async def get_jobs_json(
     db: Session = Depends(get_db), 
     company: str = None, 
-    title: str = None
+    title: str = None,
+    experience: str = None
 ):
     """Returns job listings in JSON format with optional filters."""
     query = db.query(Job)
@@ -43,6 +44,8 @@ async def get_jobs_json(
         query = query.filter(Job.company_name.contains(company))
     if title:
         query = query.filter(Job.job_title.contains(title))
+    if experience:
+        query = query.filter(Job.experience_level == experience)
     
     jobs = query.order_by(Job.date_added.desc()).all()
     return [
@@ -52,6 +55,7 @@ async def get_jobs_json(
             "job_title": j.job_title,
             "job_url": j.job_url,
             "location": j.location,
+            "experience_level": j.experience_level,
             "date_added": j.date_added.strftime("%Y-%m-%d")
         } 
         for j in jobs

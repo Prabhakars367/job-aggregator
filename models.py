@@ -25,6 +25,7 @@ class Job(Base):
     job_title = Column(String, index=True)
     job_url = Column(String, unique=True, index=True)
     location = Column(String)
+    experience_level = Column(String, index=True, default="Not Specified")
     date_added = Column(DateTime, default=datetime.datetime.utcnow)
 
 # Create the tables

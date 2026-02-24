@@ -30,10 +30,56 @@ class JobScraper(ABC):
             logger.info(f"Skipping duplicate job: {job_data['job_title']} at {job_data['company_name']}")
             return False
         
+        # Ensure experience_level is present
+        if 'experience_level' not in job_data:
+            job_data['experience_level'] = self.extract_experience(job_data.get('job_title', '') + " " + job_data.get('description', ''))
+
         new_job = Job(**job_data)
         db.add(new_job)
         db.commit()
         return True
+
+    def extract_experience(self, text: str) -> str:
+        """
+        Extracts experience level from text (title or description).
+        """
+        text = text.lower()
+        
+        # Priority 1: Direct Level Keywords
+        if any(word in text for word in ['lead', 'principal', 'staff', 'architect', 'manager', 'head']):
+            return "Lead"
+        if any(word in text for word in ['senior', 'sr.', 'sr ']):
+            return "Senior"
+        if any(word in text for word in ['junior', 'jr.', 'associate', 'fresher', 'intern', 'entry', '0-1 year', '0-2 year']):
+            return "Entry"
+        
+        # Priority 2: Year patterns (e.g., "5+ years", "3-5 yrs", "0 to 2 years")
+        import re
+        
+        # Look for range patterns first (e.g., "0-2 years", "1 to 3 yrs")
+        range_match = re.search(r'(\d+)\s*[-to]+\s*(\d+)\s*(years|yrs|year)', text)
+        if range_match:
+            start_years = int(range_match.group(1))
+            end_years = int(range_match.group(2))
+            # Categorize based on the upper bound of the range
+            return self.infer_level_from_years(end_years if start_years > 0 else start_years)
+        
+        # Look for single year patterns (e.g., "5+ years", "0 years")
+        years_match = re.search(r'(\d+)\s*\+?\s*(years|yrs|year)', text)
+        if years_match:
+            years = int(years_match.group(1))
+            return self.infer_level_from_years(years)
+            
+        return "Mid" # Default to Mid if info found but no specific level
+
+    def infer_level_from_years(self, years: int) -> str:
+        if years <= 2:
+            return "Entry"
+        if years <= 5:
+            return "Mid"
+        if years <= 10:
+            return "Senior"
+        return "Lead"
 
 class GreenhouseScraper(JobScraper):
     """Scraper for Greenhouse job boards."""
@@ -148,6 +194,7 @@ class LeverScraper(JobScraper):
                     "job_title": job.get('text'),
                     "job_url": job.get('hostedUrl'),
                     "location": job.get('categories', {}).get('location', 'Remote'),
+                    "description": job.get('descriptionPlain', ''), # Lever often has this
                     "date_added": datetime.utcnow()
                 }
                 if self.save_job(db, job_data):
@@ -307,6 +354,7 @@ class NaukriScraper(JobScraper):
                     "job_title": job.get('title'),
                     "job_url": f"https://www.naukri.com{job.get('jdURL')}",
                     "location": job.get('placeholders', [{}])[0].get('label', 'India'),
+                    "description": job.get('jobDescription', ''), # Naukri API often has this
                     "date_added": datetime.utcnow()
                 }
                 if self.save_job(db, job_data):
